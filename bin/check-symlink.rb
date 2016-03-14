@@ -26,7 +26,7 @@
 
 require 'sensu-plugin/check/cli'
 
-class CheckFileExists < Sensu::Plugin::Check::CLI
+class CheckSymlink < Sensu::Plugin::Check::CLI
   option :target,
          short: '-t TARGET',
          required: true

@@ -36,14 +36,9 @@ class CheckFileExists < Sensu::Plugin::Check::CLI
          required: true
 
   def run
-    if config[:critical] && File.exist?(config[:critical])
-      critical "#{config[:critical]} exists!"
-    elsif config[:warning] && File.exist?(config[:warning])
-      warning "#{config[:warning]} exists!"
-    elsif config[:unknown] && File.exist?(config[:unknown])
-      unknown "#{config[:unknown]} exists!"
-    else
-      ok 'No test files exist'
-    end
+    critical "Linkname #{config[:linkname]} doesn't exist" unless File.exist?(config[:linkname])
+    critical "Linkname #{config[:linkname]} isn't a symlink" unless File.symlink?(config[:linkname])
+    critical "Linkname #{config[:linkname]} doesn't match #{config[:target]} (#{File.readlink(config[:linkname])})" unless File.readlink(config[:linkname]) == config[:target]
+    ok "Linkname #{config[:linkname]} matches #{config[:target]}"
   end
 end

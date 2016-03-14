@@ -60,12 +60,14 @@ class Tail < Sensu::Plugin::Check::CLI
          boolean: true
 
   def tail_file
-    `tail #{config[:file]} -n #{config[:lines] || 1}`
+    `tail #{config[:file]} -n #{config[:lines] || 1}`.split("\n").map(&:strip)
   end
 
   def pattern_match?
     # #YELLOW
-    !!tail_file.match(config[:pattern]) # rubocop:disable Style/DoubleNegation
+    tail_file.each do |line|
+      return line if line.match(config[:pattern]) # rubocop:disable Style/DoubleNegation
+    end
   end
 
   def run
@@ -73,18 +75,18 @@ class Tail < Sensu::Plugin::Check::CLI
     unknown 'No pattern specified' unless config[:pattern]
     if File.exist?(config[:file])
       if !config[:absent]
-        if pattern_match?
+        if line=pattern_match?
           send(
             # #YELLOW
             config[:warn_only] ? :warning : :critical, # rubocop:disable BlockNesting
-            "Pattern matched: #{config[:pattern]}"
+            "Pattern matched: #{config[:pattern]} (#{line})"
           )
         else
           ok 'No matches found'
         end
       else
-        if pattern_match?
-          ok 'Match found'
+        if line=pattern_match?
+          ok "Match found (#{line})"
         else
           send(
             # #YELLOW

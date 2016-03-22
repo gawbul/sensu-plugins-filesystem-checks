@@ -66,7 +66,8 @@ class Tail < Sensu::Plugin::Check::CLI
   def pattern_match?
     # #YELLOW
     tail_file.each do |line|
-      return line if line.match(config[:pattern]) # rubocop:disable Style/DoubleNegation
+      return nil unless line.match(config[:pattern]) # rubocop:disable Style/DoubleNegation
+      return line
     end
   end
 

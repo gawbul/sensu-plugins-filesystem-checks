@@ -51,7 +51,8 @@ class Tail < Sensu::Plugin::Check::CLI
   option :lines,
          description: 'Number of lines to tail',
          short: '-l LINES',
-         long: '--lines LINES'
+         long: '--lines LINES',
+         default: 1
 
   option :warn_only,
          description: 'Warn instead of critical on match',
@@ -76,7 +77,7 @@ class Tail < Sensu::Plugin::Check::CLI
     unknown 'No pattern specified' unless config[:pattern]
     if File.exist?(config[:file])
       if !config[:absent]
-        if line=pattern_match?
+        if line=pattern_match? and !line == nil
           send(
             # #YELLOW
             config[:warn_only] ? :warning : :critical, # rubocop:disable BlockNesting
@@ -86,7 +87,7 @@ class Tail < Sensu::Plugin::Check::CLI
           ok 'No matches found'
         end
       else
-        if line=pattern_match?
+        if line=pattern_match? and !line == nil
           ok "Match found (#{line})"
         else
           send(

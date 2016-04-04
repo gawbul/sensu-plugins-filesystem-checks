@@ -76,8 +76,9 @@ class Tail < Sensu::Plugin::Check::CLI
     unknown 'No log file specified' unless config[:file]
     unknown 'No pattern specified' unless config[:pattern]
     if File.exist?(config[:file])
+      line = pattern_match?
       if !config[:absent]
-        if line=pattern_match? and !line == nil
+        if line != nil
           send(
             # #YELLOW
             config[:warn_only] ? :warning : :critical, # rubocop:disable BlockNesting
@@ -87,7 +88,7 @@ class Tail < Sensu::Plugin::Check::CLI
           ok 'No matches found'
         end
       else
-        if line=pattern_match? and !line == nil
+        if line != nil
           ok "Match found (#{line})"
         else
           send(

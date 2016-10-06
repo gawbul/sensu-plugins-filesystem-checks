@@ -24,7 +24,7 @@
 #                     [-w|--warn] <size, in bytes, to warn on>
 #                     [-c|--critical] <size, in bytes, to go CRITICAL on>
 #                     [-p|--du-path] <path/to/du>
-#                     [--ignore_missing]
+#                     [--ignore-missing]
 #
 # EXAMPLE:
 #   check-dir-size.rb /var/spool/example_dir -w 1500000 -c 2000000
@@ -73,6 +73,14 @@ class CheckDirSize < Sensu::Plugin::Check::CLI
          default: '/usr/bin/du',
          required: false
 
+  option :inodes,
+         description: 'Check values against inodes used instead of bytes',
+         long: '--inodes',
+         short: '-i',
+         boolean: true,
+         default: false,
+         required: false
+
   # Even though most everything should have 'du' installed by default, let's do a quick sanity check
   def check_external_dependency
     critical "This system does not have 'du' at #{config[:du_path]}!" unless File.exist? config[:du_path]
@@ -102,6 +110,13 @@ class CheckDirSize < Sensu::Plugin::Check::CLI
   end
 
   def run
+    if config[:inodes]
+      options = '--inodes'
+      suffix = 'inodes'
+    else
+      options = '--bytes'
+      suffix = 'bytes'
+    end
     check_external_dependency
     du_directory
     compare_size
